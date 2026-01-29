@@ -100,9 +100,15 @@ async function sendEmailNotification(leadData) {
     const apiKey = process.env.RESEND_API_KEY;
     const recipients = process.env.EMAIL_RECIPIENTS; // Comma-separated emails
     
+    console.log('Email config check:', { 
+        hasApiKey: !!apiKey, 
+        apiKeyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none',
+        recipients: recipients || 'none' 
+    });
+    
     if (!apiKey || !recipients) {
         console.log('Email notifications not configured - skipping');
-        return;
+        return { success: false, reason: 'not configured' };
     }
     
     const recipientList = recipients.split(',').map(e => e.trim()).filter(Boolean);
@@ -314,15 +320,22 @@ export default async function handler(req, res) {
         
         console.log(`Lead created successfully: ${itemId}`);
         
-        // Send email notification (don't block response, don't fail if email fails)
-        sendEmailNotification({
-            name,
-            phone: sanitizedPhone,
-            email,
-            message,
-            location,
-            pageUrl
-        }).catch(err => console.error('Email notification error:', err));
+        // Send email notification (await to ensure it runs before function terminates)
+        try {
+            console.log('Attempting to send email notification...');
+            const emailResult = await sendEmailNotification({
+                name,
+                phone: sanitizedPhone,
+                email,
+                message,
+                location,
+                pageUrl
+            });
+            console.log('Email notification result:', emailResult);
+        } catch (emailError) {
+            console.error('Email notification error:', emailError);
+            // Don't fail the whole request if email fails
+        }
         
         return res.status(200).json({ 
             success: true, 
