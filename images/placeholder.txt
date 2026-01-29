@@ -1,0 +1,24 @@
+Place your images here:
+
+Required Images:
+================
+
+Hero Slider (1920x1080px recommended):
+- hero-1.jpg
+- hero-2.jpg  
+- hero-3.jpg
+
+Designer Photo (800x1000px recommended):
+- designer.jpg
+
+Project Images (800x600px recommended):
+- project-1.jpg
+- project-2.jpg
+- project-3.jpg
+
+Tips:
+=====
+- Use high-quality, professional interior design photos
+- Optimize images for web (use TinyPNG.com or similar)
+- Consider using WebP format for better performance
+- Keep file sizes under 500KB for best loading speed
