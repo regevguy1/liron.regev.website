@@ -131,6 +131,9 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Name and phone are required' });
         }
         
+        // Sanitize phone number - remove all non-digit characters (hyphens, spaces, etc.)
+        const sanitizedPhone = phone.replace(/\D/g, '');
+        
         // Get IP address from headers (Vercel provides this)
         const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
                    req.headers['x-real-ip'] || 
@@ -146,7 +149,7 @@ export default async function handler(req, res) {
         // Build column values for Monday.com
         // Only include columns that have values to avoid Monday.com validation errors
         const columnValues = {
-            [COLUMN_IDS.phone]: phone,
+            [COLUMN_IDS.phone]: sanitizedPhone,
             [COLUMN_IDS.ipAddress]: ip || '',
             [COLUMN_IDS.location]: location || '',
             [COLUMN_IDS.userAgent]: (userAgent || '').substring(0, 500),
