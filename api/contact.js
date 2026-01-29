@@ -207,7 +207,7 @@ async function sendEmailNotification(leadData) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'leads@resend.dev', // Use your verified domain later
+                from: 'לידים חדשים <leads@lironregev.com>',
                 to: recipientList,
                 subject: `🎉 ליד חדש: ${leadData.name} - ${leadData.phone}`,
                 html: htmlContent
