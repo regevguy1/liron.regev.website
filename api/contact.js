@@ -1,6 +1,7 @@
 /**
  * Vercel Serverless Function - Contact Form Handler
  * Sends form submissions to Monday.com with tracking data
+ * Sends email notifications via Resend
  */
 
 // Monday.com Board Configuration
@@ -92,6 +93,143 @@ async function createMondayItem(itemName, columnValues) {
 }
 
 /**
+ * Send email notification via Resend
+ * @param {Object} leadData - The lead information
+ */
+async function sendEmailNotification(leadData) {
+    const apiKey = process.env.RESEND_API_KEY;
+    const recipients = process.env.EMAIL_RECIPIENTS; // Comma-separated emails
+    
+    if (!apiKey || !recipients) {
+        console.log('Email notifications not configured - skipping');
+        return;
+    }
+    
+    const recipientList = recipients.split(',').map(e => e.trim()).filter(Boolean);
+    
+    if (recipientList.length === 0) {
+        console.log('No email recipients configured - skipping');
+        return;
+    }
+    
+    // Format current time in Israel timezone
+    const now = new Date().toLocaleString('he-IL', { 
+        timeZone: 'Asia/Jerusalem',
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Build HTML email content
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="he">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 10px 0 0; opacity: 0.9; }
+            .content { padding: 30px; }
+            .field { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-right: 4px solid #667eea; }
+            .field-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
+            .field-value { font-size: 16px; color: #333; }
+            .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; margin-top: 20px; }
+            .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #eee; }
+            .phone-link { color: #667eea; text-decoration: none; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎉 ליד חדש התקבל!</h1>
+                <p>מישהו מעוניין בשירותים שלך</p>
+            </div>
+            <div class="content">
+                <div class="field">
+                    <div class="field-label">👤 שם</div>
+                    <div class="field-value">${leadData.name}</div>
+                </div>
+                <div class="field">
+                    <div class="field-label">📱 טלפון</div>
+                    <div class="field-value">
+                        <a href="tel:${leadData.phone}" class="phone-link">${leadData.phone}</a>
+                    </div>
+                </div>
+                ${leadData.email ? `
+                <div class="field">
+                    <div class="field-label">📧 אימייל</div>
+                    <div class="field-value">${leadData.email}</div>
+                </div>
+                ` : ''}
+                ${leadData.message ? `
+                <div class="field">
+                    <div class="field-label">💬 הודעה</div>
+                    <div class="field-value">${leadData.message}</div>
+                </div>
+                ` : ''}
+                <div class="field">
+                    <div class="field-label">📍 מיקום</div>
+                    <div class="field-value">${leadData.location || 'לא זמין'}</div>
+                </div>
+                <div class="field">
+                    <div class="field-label">🕐 זמן קבלה</div>
+                    <div class="field-value">${now}</div>
+                </div>
+                ${leadData.pageUrl ? `
+                <div class="field">
+                    <div class="field-label">🔗 דף מקור</div>
+                    <div class="field-value">${leadData.pageUrl}</div>
+                </div>
+                ` : ''}
+                <center>
+                    <a href="tel:${leadData.phone}" class="cta">📞 התקשר עכשיו</a>
+                </center>
+            </div>
+            <div class="footer">
+                ⚡ פעולה נדרשת: יש ליצור קשר בהקדם האפשרי!
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'leads@resend.dev', // Use your verified domain later
+                to: recipientList,
+                subject: `🎉 ליד חדש: ${leadData.name} - ${leadData.phone}`,
+                html: htmlContent
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Email send failed:', error);
+            return { success: false, error };
+        }
+
+        const result = await response.json();
+        console.log('Email sent successfully:', result.id);
+        return { success: true, id: result.id };
+    } catch (error) {
+        console.error('Email send error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
  * Main handler
  */
 export default async function handler(req, res) {
@@ -175,6 +313,16 @@ export default async function handler(req, res) {
         const itemId = await createMondayItem(name, columnValues);
         
         console.log(`Lead created successfully: ${itemId}`);
+        
+        // Send email notification (don't block response, don't fail if email fails)
+        sendEmailNotification({
+            name,
+            phone: sanitizedPhone,
+            email,
+            message,
+            location,
+            pageUrl
+        }).catch(err => console.error('Email notification error:', err));
         
         return res.status(200).json({ 
             success: true, 
