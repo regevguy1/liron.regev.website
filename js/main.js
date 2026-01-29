@@ -11,6 +11,48 @@
     // Configuration
     // ==========================================================================
     let config = null;
+    
+    // ==========================================================================
+    // UTM & Tracking Data
+    // ==========================================================================
+    let trackingData = {};
+    
+    /**
+     * Capture UTM parameters and tracking data on page load
+     */
+    function captureTrackingData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        trackingData = {
+            utmSource: urlParams.get('utm_source') || '',
+            utmMedium: urlParams.get('utm_medium') || '',
+            utmCampaign: urlParams.get('utm_campaign') || '',
+            utmTerm: urlParams.get('utm_term') || '',
+            utmContent: urlParams.get('utm_content') || '',
+            referrer: document.referrer || '',
+            pageUrl: window.location.href,
+            userAgent: navigator.userAgent
+        };
+        
+        // Store in sessionStorage to persist across page navigations
+        sessionStorage.setItem('trackingData', JSON.stringify(trackingData));
+    }
+    
+    /**
+     * Get tracking data (from memory or sessionStorage)
+     */
+    function getTrackingData() {
+        if (Object.keys(trackingData).length > 0) {
+            return trackingData;
+        }
+        
+        const stored = sessionStorage.getItem('trackingData');
+        if (stored) {
+            trackingData = JSON.parse(stored);
+        }
+        
+        return trackingData;
+    }
 
     /**
      * Load configuration from JSON file
@@ -465,7 +507,7 @@
     // ==========================================================================
     // Contact Form
     // ==========================================================================
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
         e.preventDefault();
         
         const formData = new FormData(contactForm);
@@ -474,6 +516,8 @@
         // Get messages from config or use defaults
         const errorMsg = config?.contact?.form?.errorMessage || 'אנא מלאו את השדות הנדרשים';
         const successMsg = config?.contact?.form?.successMessage || 'תודה! הפרטים התקבלו בהצלחה. ניצור איתך קשר בהקדם.';
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn?.textContent;
         
         // Basic validation
         if (!data.name || !data.phone) {
@@ -481,15 +525,55 @@
             return;
         }
         
-        // Here you would typically send the data to a server
-        // For now, we'll just show a success message
-        console.log('Form submitted:', data);
+        // Get tracking data
+        const tracking = getTrackingData();
         
-        // Show success message
-        alert(successMsg);
+        // Prepare payload
+        const payload = {
+            name: data.name,
+            phone: data.phone,
+            email: data.email || '',
+            message: data.message || '',
+            ...tracking
+        };
         
-        // Reset form
-        contactForm.reset();
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+        }
+        
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                // Success
+                alert(successMsg);
+                contactForm.reset();
+            } else {
+                // API error
+                console.error('Form submission error:', result);
+                alert(result.error || 'אירעה שגיאה בשליחת הטופס. אנא נסו שוב.');
+            }
+        } catch (error) {
+            // Network error
+            console.error('Network error:', error);
+            alert('אירעה שגיאה בשליחת הטופס. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
+        } finally {
+            // Restore button state
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        }
     }
 
     // ==========================================================================
@@ -637,6 +721,9 @@
     async function init() {
         // Load configuration first
         await loadConfig();
+        
+        // Capture UTM parameters and tracking data
+        captureTrackingData();
         
         // Cache DOM elements
         cacheElements();
