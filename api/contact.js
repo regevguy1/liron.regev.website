@@ -144,13 +144,12 @@ export default async function handler(req, res) {
         const today = new Date().toISOString().split('T')[0];
         
         // Build column values for Monday.com
+        // Only include columns that have values to avoid Monday.com validation errors
         const columnValues = {
-            [COLUMN_IDS.phone]: { phone: phone, countryShortName: 'IL' },
-            [COLUMN_IDS.email]: { email: email || '', text: email || '' },
-            [COLUMN_IDS.message]: { text: message || '' },
-            [COLUMN_IDS.ipAddress]: ip,
-            [COLUMN_IDS.location]: location,
-            [COLUMN_IDS.userAgent]: (userAgent || '').substring(0, 500), // Limit length
+            [COLUMN_IDS.phone]: phone,
+            [COLUMN_IDS.ipAddress]: ip || '',
+            [COLUMN_IDS.location]: location || '',
+            [COLUMN_IDS.userAgent]: (userAgent || '').substring(0, 500),
             [COLUMN_IDS.referrer]: referrer || '',
             [COLUMN_IDS.utmSource]: utmSource || '',
             [COLUMN_IDS.utmMedium]: utmMedium || '',
@@ -158,6 +157,16 @@ export default async function handler(req, res) {
             [COLUMN_IDS.pageUrl]: pageUrl || '',
             [COLUMN_IDS.submittedAt]: { date: today }
         };
+        
+        // Only add email if provided (empty email objects cause errors)
+        if (email) {
+            columnValues[COLUMN_IDS.email] = { email: email, text: email };
+        }
+        
+        // Only add message if provided
+        if (message) {
+            columnValues[COLUMN_IDS.message] = { text: message };
+        }
         
         // Create item in Monday.com
         const itemId = await createMondayItem(name, columnValues);
