@@ -716,6 +716,219 @@
     }
 
     // ==========================================================================
+    // Gallery Lightbox
+    // ==========================================================================
+    let lightbox, lightboxImage, lightboxClose, lightboxPrev, lightboxNext, lightboxCounter;
+    let galleryItems = [];
+    let currentLightboxIndex = 0;
+
+    function initGalleryLightbox() {
+        lightbox = document.getElementById('lightbox');
+        if (!lightbox) return;
+
+        lightboxImage = document.getElementById('lightbox-image');
+        lightboxClose = document.getElementById('lightbox-close');
+        lightboxPrev = document.getElementById('lightbox-prev');
+        lightboxNext = document.getElementById('lightbox-next');
+        lightboxCounter = document.getElementById('lightbox-counter');
+
+        // Get all gallery items
+        galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+        
+        if (galleryItems.length === 0) return;
+
+        // Add click handlers to gallery items
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', () => openLightbox(index));
+        });
+
+        // Close button
+        lightboxClose?.addEventListener('click', closeLightbox);
+
+        // Navigation
+        lightboxPrev?.addEventListener('click', () => navigateLightbox(-1));
+        lightboxNext?.addEventListener('click', () => navigateLightbox(1));
+
+        // Close on background click
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', handleLightboxKeyboard);
+
+        // Touch swipe for lightbox
+        initLightboxTouch();
+    }
+
+    function openLightbox(index) {
+        if (!lightbox || !galleryItems[index]) return;
+
+        currentLightboxIndex = index;
+        const img = galleryItems[index].querySelector('img');
+        
+        if (img) {
+            lightboxImage.src = img.src;
+            lightboxImage.alt = img.alt;
+        }
+
+        updateLightboxCounter();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        if (!lightbox) return;
+        
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function navigateLightbox(direction) {
+        currentLightboxIndex += direction;
+        
+        // Wrap around
+        if (currentLightboxIndex >= galleryItems.length) {
+            currentLightboxIndex = 0;
+        } else if (currentLightboxIndex < 0) {
+            currentLightboxIndex = galleryItems.length - 1;
+        }
+
+        const img = galleryItems[currentLightboxIndex].querySelector('img');
+        if (img) {
+            // Add fade effect
+            lightboxImage.style.opacity = '0';
+            setTimeout(() => {
+                lightboxImage.src = img.src;
+                lightboxImage.alt = img.alt;
+                lightboxImage.style.opacity = '1';
+            }, 150);
+        }
+
+        updateLightboxCounter();
+    }
+
+    function updateLightboxCounter() {
+        if (lightboxCounter) {
+            lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${galleryItems.length}`;
+        }
+    }
+
+    function handleLightboxKeyboard(e) {
+        if (!lightbox?.classList.contains('active')) return;
+
+        switch (e.key) {
+            case 'Escape':
+                closeLightbox();
+                break;
+            case 'ArrowRight':
+                // In RTL, right arrow goes to previous
+                navigateLightbox(document.dir === 'rtl' ? -1 : 1);
+                break;
+            case 'ArrowLeft':
+                // In RTL, left arrow goes to next
+                navigateLightbox(document.dir === 'rtl' ? 1 : -1);
+                break;
+        }
+    }
+
+    function initLightboxTouch() {
+        if (!lightbox) return;
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        lightbox.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        lightbox.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            const swipeThreshold = 50;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                // In RTL, swipe directions are reversed
+                const isRTL = document.dir === 'rtl';
+                if ((diff > 0 && !isRTL) || (diff < 0 && isRTL)) {
+                    navigateLightbox(1);
+                } else {
+                    navigateLightbox(-1);
+                }
+            }
+        }, { passive: true });
+    }
+
+    // ==========================================================================
+    // Project Page Contact Form
+    // ==========================================================================
+    function initProjectContactForm() {
+        const projectForm = document.getElementById('project-contact-form');
+        if (!projectForm) return;
+
+        projectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(projectForm);
+            const data = Object.fromEntries(formData.entries());
+            const submitBtn = projectForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn?.textContent;
+            
+            // Basic validation
+            if (!data.name || !data.phone) {
+                alert('אנא מלאו את השדות הנדרשים');
+                return;
+            }
+            
+            // Get tracking data
+            const tracking = getTrackingData();
+            
+            // Prepare payload
+            const payload = {
+                name: data.name,
+                phone: data.phone,
+                email: data.email || '',
+                message: data.message || '',
+                ...tracking
+            };
+            
+            // Show loading state
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'שולח...';
+            }
+            
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    alert('תודה! הפרטים התקבלו בהצלחה. ניצור איתך קשר בהקדם.');
+                    projectForm.reset();
+                } else {
+                    console.error('Form submission error:', result);
+                    alert(result.error || 'אירעה שגיאה בשליחת הטופס. אנא נסו שוב.');
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                alert('אירעה שגיאה בשליחת הטופס. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            }
+        });
+    }
+
+    // ==========================================================================
     // Initialize
     // ==========================================================================
     async function init() {
@@ -783,6 +996,12 @@
         
         // Initialize touch support
         initTouchSupport();
+        
+        // Initialize gallery lightbox (for project pages)
+        initGalleryLightbox();
+        
+        // Initialize project page contact form
+        initProjectContactForm();
         
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {

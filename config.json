@@ -51,10 +51,11 @@
     "viewProjectText": "לדף הפרויקט",
     "items": [
       {
-        "title": "פרויקט דירת יוקרה",
+        "id": "rishon-se",
+        "title": "בית פרטי ראשון לציון S&E",
         "description": "הבית נבנה מתוך מחשבה על חיי היום-יום לצד האפשרות לארח את המשפחה בנוחות ובאהבה.",
-        "image": "images/project-1.jpg",
-        "link": "#"
+        "image": "images/rishon_letziyon_s_and_e/_DSC4639-Edit.jpg",
+        "link": "project-rishon-se.html"
       },
       {
         "title": "פרויקט בית פרטי",
@@ -69,6 +70,42 @@
         "link": "#"
       }
     ]
+  },
+
+  "projectGalleries": {
+    "rishon-se": {
+      "title": "בית פרטי ראשון לציון S&E",
+      "description": "בית פרטי מעוצב בקפידה עם דגש על חיי היום-יום לצד האפשרות לארח את המשפחה בנוחות ובאהבה.",
+      "contactTitle": "אהבתם? בואו נעצב לכם חלום משלכם",
+      "images": [
+        "images/rishon_letziyon_s_and_e/_DSC4639-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4644-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4653.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4656.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4676.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4697-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4701.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4709.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4748 copy.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4754.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4775 copy.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4789-Edit copy.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4821-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4840-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4876-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4883-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4895-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4912-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4960-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4975-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC4988-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC5017-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC5045-Edit-Edit.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC5054-Edit-Edit copy.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC5070 copy.jpg",
+        "images/rishon_letziyon_s_and_e/_DSC5105-Edit.jpg"
+      ]
+    }
   },
 
   "process": {
