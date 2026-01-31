@@ -46,7 +46,7 @@
   },
 
   "projects": {
-    "sectionTitle": "פרויקטים לדוגמה",
+    "sectionTitle": "פרוייקטים",
     "viewAllText": "לכל הפרויקטים",
     "viewProjectText": "לדף הפרויקט",
     "items": [
@@ -165,7 +165,7 @@
   },
 
   "contact": {
-    "sectionTitle": "צרו קשר",
+    "sectionTitle": "בואו נדבר",
     "subtitle": "מוזמנים ליצור קשר לפגישת ייעוץ ראשונית ללא התחייבות",
     "form": {
       "nameLabel": "שם מלא *",
