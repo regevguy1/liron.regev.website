@@ -594,10 +594,20 @@ input, textarea {
     justify-content: center;
     opacity: 0;
     transition: opacity var(--transition-base);
+    pointer-events: none; /* Allow clicks to pass through to the link */
 }
 
 .project-card:hover .project-overlay {
     opacity: 1;
+}
+
+.project-overlay .btn {
+    pointer-events: auto; /* Re-enable for the button text */
+}
+
+.project-image-link {
+    display: block;
+    cursor: pointer;
 }
 
 .project-content {
@@ -1281,7 +1291,7 @@ input, textarea {
 }
 
 /* --------------------------------------------------------------------------
-   Lightbox
+   Lightbox with Contact Form
    -------------------------------------------------------------------------- */
 .lightbox {
     position: fixed;
@@ -1292,20 +1302,127 @@ input, textarea {
     background: rgba(0, 0, 0, 0.95);
     z-index: 2000;
     display: none;
-    align-items: center;
-    justify-content: center;
     opacity: 0;
     transition: opacity var(--transition-base);
 }
 
 .lightbox.active {
-    display: flex;
+    display: block;
     opacity: 1;
 }
 
+.lightbox-wrapper {
+    display: flex;
+    height: 100%;
+    flex-direction: row-reverse; /* RTL: form on left, image on right */
+}
+
+/* Sidebar with Contact Form */
+.lightbox-sidebar {
+    width: 320px;
+    min-width: 320px;
+    background: var(--color-background);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+}
+
+.lightbox-form-container {
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.lightbox-form-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+}
+
+.lightbox-form-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.lightbox-contact-form .form-group {
+    margin-bottom: var(--spacing-sm);
+}
+
+.lightbox-contact-form .form-group label {
+    font-size: var(--font-size-sm);
+    margin-bottom: 4px;
+}
+
+.lightbox-contact-form .form-group input {
+    padding: 10px 12px;
+    font-size: var(--font-size-sm);
+}
+
+.lightbox-contact-form .btn {
+    margin-top: var(--spacing-sm);
+    padding: 12px var(--spacing-lg);
+}
+
+.lightbox-form-footer {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.lightbox-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-light);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--color-background-alt);
+}
+
+.lightbox-contact-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+.lightbox-contact-link:hover {
+    color: var(--color-secondary);
+    background: var(--color-border);
+}
+
+.lightbox-whatsapp {
+    color: #25D366;
+}
+
+.lightbox-whatsapp:hover {
+    color: #128C7E;
+    background: rgba(37, 211, 102, 0.1);
+}
+
+/* Main Image Area */
+.lightbox-main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+}
+
 .lightbox-content {
-    max-width: 90vw;
-    max-height: 85vh;
+    max-width: 100%;
+    max-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1317,9 +1434,37 @@ input, textarea {
     object-fit: contain;
     border-radius: var(--radius-sm);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.15s ease;
 }
 
-.lightbox-close,
+/* Close Button */
+.lightbox-close {
+    position: absolute;
+    top: var(--spacing-lg);
+    left: var(--spacing-lg);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: all var(--transition-base);
+    z-index: 2001;
+}
+
+.lightbox-close:hover {
+    background: var(--color-secondary);
+    transform: scale(1.1);
+}
+
+.lightbox-close svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Navigation Buttons */
 .lightbox-prev,
 .lightbox-next {
     position: absolute;
@@ -1333,21 +1478,16 @@ input, textarea {
     border-radius: 50%;
     transition: all var(--transition-base);
     z-index: 2001;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-.lightbox-close:hover,
 .lightbox-prev:hover,
 .lightbox-next:hover {
     background: var(--color-secondary);
-    transform: scale(1.1);
+    transform: translateY(-50%) scale(1.1);
 }
 
-.lightbox-close {
-    top: var(--spacing-lg);
-    right: var(--spacing-lg);
-}
-
-.lightbox-close svg,
 .lightbox-prev svg,
 .lightbox-next svg {
     width: 24px;
@@ -1355,37 +1495,10 @@ input, textarea {
 }
 
 .lightbox-prev {
-    left: var(--spacing-lg);
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.lightbox-prev:hover {
-    transform: translateY(-50%) scale(1.1);
+    right: var(--spacing-lg);
 }
 
 .lightbox-next {
-    right: var(--spacing-lg);
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.lightbox-next:hover {
-    transform: translateY(-50%) scale(1.1);
-}
-
-[dir="rtl"] .lightbox-prev {
-    left: auto;
-    right: var(--spacing-lg);
-}
-
-[dir="rtl"] .lightbox-next {
-    right: auto;
-    left: var(--spacing-lg);
-}
-
-[dir="rtl"] .lightbox-close {
-    right: auto;
     left: var(--spacing-lg);
 }
 
@@ -1466,16 +1579,73 @@ input, textarea {
         justify-content: center;
     }
     
-    .lightbox-prev,
-    .lightbox-next {
+    /* Lightbox mobile layout */
+    .lightbox-wrapper {
+        flex-direction: column;
+    }
+    
+    .lightbox-sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        padding: var(--spacing-md);
+        order: 2; /* Form below image on mobile */
+    }
+    
+    .lightbox-form-container {
+        max-width: 100%;
+    }
+    
+    .lightbox-form-title {
+        font-size: var(--font-size-lg);
+        text-align: center;
+    }
+    
+    .lightbox-form-subtitle {
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .lightbox-main {
+        flex: none;
+        height: 50vh;
+        padding: var(--spacing-md);
+        padding-top: 60px; /* Space for close button */
+    }
+    
+    .lightbox-content img {
+        max-height: 45vh;
+    }
+    
+    .lightbox-close {
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
         width: 40px;
         height: 40px;
     }
     
+    .lightbox-prev,
+    .lightbox-next {
+        width: 36px;
+        height: 36px;
+    }
+    
     .lightbox-prev svg,
     .lightbox-next svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
+    }
+    
+    .lightbox-prev {
+        right: var(--spacing-sm);
+    }
+    
+    .lightbox-next {
+        left: var(--spacing-sm);
+    }
+    
+    .lightbox-counter {
+        bottom: var(--spacing-sm);
     }
 }
 

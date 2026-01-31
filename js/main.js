@@ -193,7 +193,8 @@
                     const img = card.querySelector('.project-image img');
                     const title = card.querySelector('.project-title');
                     const desc = card.querySelector('.project-description');
-                    const link = card.querySelector('.project-overlay a');
+                    const imageLink = card.querySelector('.project-image-link');
+                    const overlayText = card.querySelector('.project-overlay span, .project-overlay a');
                     
                     if (img) {
                         img.src = project.image;
@@ -201,9 +202,11 @@
                     }
                     if (title) title.textContent = project.title;
                     if (desc) desc.textContent = project.description;
-                    if (link) {
-                        link.href = project.link;
-                        link.textContent = config.projects.viewProjectText;
+                    if (imageLink) {
+                        imageLink.href = project.link;
+                    }
+                    if (overlayText) {
+                        overlayText.textContent = config.projects.viewProjectText;
                     }
                 }
             });
@@ -287,6 +290,99 @@
                     link.textContent = config.footer.links[index].text;
                     link.href = config.footer.links[index].href;
                 }
+            });
+        }
+    }
+
+    /**
+     * Apply configuration specifically for project pages
+     */
+    function applyProjectPageConfig() {
+        if (!config) return;
+        
+        // Check if we're on a project page
+        const projectId = document.body.dataset.projectId;
+        if (!projectId) return;
+        
+        const projectGallery = config.projectGalleries?.[projectId];
+        const projectPage = config.projectPage;
+        
+        // Apply project-specific content
+        if (projectGallery) {
+            const title = document.querySelector('[data-config="project-title"]');
+            const desc = document.querySelector('[data-config="project-description"]');
+            
+            if (title) title.textContent = projectGallery.title;
+            if (desc) desc.textContent = projectGallery.description;
+        }
+        
+        // Apply shared project page content
+        if (projectPage) {
+            // Back link
+            const backLink = document.querySelector('[data-config="project-back-link"]');
+            if (backLink) backLink.textContent = projectPage.backLink;
+            
+            // Lightbox form
+            const lightboxTitle = document.querySelector('[data-config="lightbox-title"]');
+            const lightboxSubtitle = document.querySelector('[data-config="lightbox-subtitle"]');
+            const lightboxSubmit = document.querySelector('[data-config="lightbox-submit"]');
+            
+            if (lightboxTitle) lightboxTitle.textContent = projectPage.lightbox?.title;
+            if (lightboxSubtitle) lightboxSubtitle.textContent = projectPage.lightbox?.subtitle;
+            if (lightboxSubmit) lightboxSubmit.textContent = projectPage.lightbox?.submitText;
+            
+            // Contact section
+            const contactTitle = document.querySelector('[data-config="project-contact-title"]');
+            const contactSubtitle = document.querySelector('[data-config="project-contact-subtitle"]');
+            
+            if (contactTitle) contactTitle.textContent = projectPage.contactSection?.title;
+            if (contactSubtitle) contactSubtitle.textContent = projectPage.contactSection?.subtitle;
+        }
+        
+        // Apply form labels from main config
+        if (config.contact?.form) {
+            document.querySelectorAll('[data-config="form-name-label"]').forEach(el => {
+                el.textContent = config.contact.form.nameLabel;
+            });
+            document.querySelectorAll('[data-config="form-phone-label"]').forEach(el => {
+                el.textContent = config.contact.form.phoneLabel;
+            });
+            document.querySelectorAll('[data-config="form-email-label"]').forEach(el => {
+                el.textContent = config.contact.form.emailLabel;
+            });
+            document.querySelectorAll('[data-config="form-message-label"]').forEach(el => {
+                el.textContent = config.contact.form.messageLabel;
+            });
+            document.querySelectorAll('[data-config="form-submit"]').forEach(el => {
+                el.textContent = config.contact.form.submitText;
+            });
+        }
+        
+        // Apply designer info (phone, email) to project pages
+        if (config.designer) {
+            document.querySelectorAll('[data-config="phone"]').forEach(el => {
+                el.textContent = config.designer.phone;
+                if (el.tagName === 'A') {
+                    el.href = `tel:${config.designer.phone.replace(/-/g, '')}`;
+                }
+            });
+            document.querySelectorAll('[data-config="email"]').forEach(el => {
+                el.textContent = config.designer.email;
+                if (el.tagName === 'A') {
+                    el.href = `mailto:${config.designer.email}`;
+                }
+            });
+            
+            // Phone links in lightbox footer
+            document.querySelectorAll('[data-config="phone-link"]').forEach(el => {
+                el.href = `tel:${config.designer.phone.replace(/-/g, '')}`;
+            });
+        }
+        
+        // Apply social links (whatsapp)
+        if (config.social) {
+            document.querySelectorAll('[data-social="whatsapp-link"]').forEach(el => {
+                el.href = config.social.whatsapp;
             });
         }
     }
@@ -863,69 +959,81 @@
     // Project Page Contact Form
     // ==========================================================================
     function initProjectContactForm() {
-        const projectForm = document.getElementById('project-contact-form');
-        if (!projectForm) return;
-
-        projectForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(projectForm);
-            const data = Object.fromEntries(formData.entries());
-            const submitBtn = projectForm.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn?.textContent;
-            
-            // Basic validation
-            if (!data.name || !data.phone) {
-                alert('אנא מלאו את השדות הנדרשים');
-                return;
-            }
-            
-            // Get tracking data
-            const tracking = getTrackingData();
-            
-            // Prepare payload
-            const payload = {
-                name: data.name,
-                phone: data.phone,
-                email: data.email || '',
-                message: data.message || '',
-                ...tracking
-            };
-            
-            // Show loading state
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'שולח...';
-            }
-            
-            try {
-                const response = await fetch('/api/contact', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    alert('תודה! הפרטים התקבלו בהצלחה. ניצור איתך קשר בהקדם.');
-                    projectForm.reset();
-                } else {
-                    console.error('Form submission error:', result);
-                    alert(result.error || 'אירעה שגיאה בשליחת הטופס. אנא נסו שוב.');
-                }
-            } catch (error) {
-                console.error('Network error:', error);
-                alert('אירעה שגיאה בשליחת הטופס. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
-                }
-            }
+        // Handle all project contact forms (main page and lightbox)
+        const forms = [
+            document.getElementById('project-contact-form'),
+            document.getElementById('lightbox-contact-form')
+        ].filter(Boolean);
+        
+        forms.forEach(form => {
+            form.addEventListener('submit', handleProjectFormSubmit);
         });
+    }
+    
+    async function handleProjectFormSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn?.textContent;
+        
+        // Basic validation
+        if (!data.name || !data.phone) {
+            alert('אנא מלאו את השדות הנדרשים');
+            return;
+        }
+        
+        // Get tracking data
+        const tracking = getTrackingData();
+        
+        // Prepare payload
+        const payload = {
+            name: data.name,
+            phone: data.phone,
+            email: data.email || '',
+            message: data.message || '',
+            ...tracking
+        };
+        
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+        }
+        
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                alert('תודה! הפרטים התקבלו בהצלחה. ניצור איתך קשר בהקדם.');
+                form.reset();
+                // Close lightbox if form was submitted from there
+                if (form.id === 'lightbox-contact-form') {
+                    closeLightbox();
+                }
+            } else {
+                console.error('Form submission error:', result);
+                alert(result.error || 'אירעה שגיאה בשליחת הטופס. אנא נסו שוב.');
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('אירעה שגיאה בשליחת הטופס. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        }
     }
 
     // ==========================================================================
@@ -943,6 +1051,9 @@
         
         // Apply configuration to the page
         applyConfig();
+        
+        // Apply project page specific config
+        applyProjectPageConfig();
         
         // Scroll event with throttling
         window.addEventListener('scroll', onScroll, { passive: true });

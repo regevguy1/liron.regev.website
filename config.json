@@ -72,11 +72,23 @@
     ]
   },
 
+  "projectPage": {
+    "backLink": "חזרה לפרויקטים",
+    "lightbox": {
+      "title": "אהבתם את מה שאתם רואים?",
+      "subtitle": "השאירו פרטים ונתחיל לעצב את החלום שלכם",
+      "submitText": "בואו נדבר"
+    },
+    "contactSection": {
+      "title": "אהבתם? בואו נעצב לכם חלום משלכם",
+      "subtitle": "השאירו פרטים ואחזור אליכם לשיחת ייעוץ ראשונית ללא התחייבות"
+    }
+  },
+
   "projectGalleries": {
     "rishon-se": {
       "title": "בית פרטי ראשון לציון S&E",
       "description": "בית פרטי מעוצב בקפידה עם דגש על חיי היום-יום לצד האפשרות לארח את המשפחה בנוחות ובאהבה.",
-      "contactTitle": "אהבתם? בואו נעצב לכם חלום משלכם",
       "images": [
         "images/rishon_letziyon_s_and_e/_DSC4639-Edit.jpg",
         "images/rishon_letziyon_s_and_e/_DSC4644-Edit.jpg",

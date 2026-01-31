@@ -1,0 +1,52 @@
+---
+description: Liron Website project conventions - config-driven content, no hardcoding
+alwaysApply: true
+---
+
+# Project Conventions
+
+## Config-Driven Content
+
+**All text content, contact info, and data must be in `config.json`** - never hardcoded in HTML.
+
+### Required Pattern
+
+```html
+<!-- ❌ BAD - Hardcoded -->
+<h2>צרו קשר</h2>
+<a href="tel:050-6940292">050-6940292</a>
+
+<!-- ✅ GOOD - Config-driven with data attributes -->
+<h2 data-config="contact-title">צרו קשר</h2>
+<a href="tel:050-6940292" data-config="phone">050-6940292</a>
+```
+
+### Config Structure
+
+Store all content in `config.json`:
+- `designer.*` - Phone, email, address, name
+- `social.*` - WhatsApp, Instagram, Facebook URLs
+- `projects.items[]` - Project data with id, title, description, images
+- `projectGalleries.*` - Gallery-specific data per project
+
+## Project Pages
+
+Each project page (`project-*.html`) should:
+1. Use `data-config` attributes for all text
+2. Reference `config.json` for project-specific content via project ID
+3. Share the same contact form logic as main page
+4. Load content dynamically via `main.js`
+
+## Contact Forms
+
+Contact forms appear in:
+- Main page contact section
+- Project page bottom section  
+- Project page lightbox sidebar
+
+All forms use the same submission logic in `main.js` and send to `/api/contact`.
+
+## File Naming
+
+- Project pages: `project-{id}.html` where id matches `config.json` project ID
+- Project images: `images/{project-folder}/` with descriptive names
