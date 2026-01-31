@@ -217,47 +217,16 @@
     </div>
 
     <!-- Project Contact Section -->
-    <section class="project-contact" id="project-contact">
+    <section class="contact-section" id="project-contact">
         <div class="container">
-            <div class="project-contact-wrapper">
-                <div class="project-contact-info">
-                    <h2 class="project-contact-title" data-config="project-contact-title">אהבתם? בואו נעצב לכם חלום משלכם</h2>
-                    <p class="project-contact-text" data-config="project-contact-subtitle">
-                        השאירו פרטים ואחזור אליכם לשיחת ייעוץ ראשונית ללא התחייבות
-                    </p>
-                    
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-                            <a href="tel:050-6940292" data-config="phone">050-6940292</a>
-                        </div>
-                        <div class="contact-item">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                            <a href="mailto:lironm.regev@gmail.com" data-config="email">lironm.regev@gmail.com</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <form class="contact-form project-contact-form" id="project-contact-form">
-                    <div class="form-group">
-                        <label for="name" data-config="form-name-label">שם מלא *</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone" data-config="form-phone-label">טלפון *</label>
-                        <input type="tel" id="phone" name="phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email" data-config="form-email-label">אימייל</label>
-                        <input type="email" id="email" name="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="message" data-config="form-message-label">הודעה</label>
-                        <textarea id="message" name="message" rows="4" placeholder="ספרו לי על הפרויקט שלכם..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full" data-config="form-submit">שליחה</button>
-                </form>
-            </div>
+            <h2 class="contact-heading" data-config="project-contact-title">אהבתם? בואו נעצב לכם חלום משלכם</h2>
+            
+            <form class="inline-form" id="project-contact-form">
+                <input type="text" id="project-name" name="name" class="inline-form-input" placeholder="שם מלא" required>
+                <input type="email" id="project-email" name="email" class="inline-form-input" placeholder="אימייל">
+                <input type="tel" id="project-phone" name="phone" class="inline-form-input" placeholder="נייד" required>
+                <button type="submit" class="inline-form-submit">שליחה</button>
+            </form>
         </div>
     </section>
 
